@@ -1,9 +1,10 @@
 %% init Rajamani
+% open_system('LKATestBenchExample')
 clc
 % clear all
 % close all
 
-Ts = 0.1;
+Ts = 0.05;
 g = 9.806;
 
 lr = 1.1;
@@ -127,7 +128,7 @@ X_k = [x_k; u_k_1];
 n_p =30;
 
 % control horizon
-n_c = 5;
+n_c = 10;
 
 % F matrix 
 F = AA;
@@ -160,29 +161,42 @@ end
 % weighting matrices
 
 % w_x = [0.2 0.5 1 100 1]; % p=10, c~=4
-w_x = [0.1 0.3 1 200 1]; % p=30, c=5
+% w_x = [60 50 1000 2000 500]; % p=30, c=5
+% w_x = [1000 1000 7000 30000 5]; % p=30, c=10
+% w_x = [2 5 10 400 0]; % Ts = 0.2 p=30, c=10
+w_x = [20 5 10 400 0]; % Ts = 0.05 p=30, c=10
 
 w_x1 = w_x;
 for i = 1:n_p-1
     w_x = [w_x w_x1];
+%     w_x = w_x.*1.1;   
 end
 W_x = diag(w_x);
 
-%W_u = diag([1:n_c]);%diag(w_u);
-W_u = eye(n_c);
+w_u = 1;
+w_u1 = w_u;
+for i = 1:n_c-1
+    w_u = [w_u w_u1];
+%     w_u = w_u.*2;
+end
+W_u = diag(w_u);
+
+
+% W_u = diag([1:n_c].*1000);%diag(w_u);
+% W_u = eye(n_c);
 
 UU = -inv(Phi1' * W_x * Phi1 + W_u) * Phi1' * W_x;
 
-MPC_Control([1:n_p+5]')
+MPC_Control([1:n_p+7]')
 
 
-sim('Simulation')
-PlotSim
-
-
-
-
-
+% sim('Simulation')
+% PlotSim
+sim('LKATestBenchExample')
+plotLKAPerformance(logsout)
+hold on
+% plotLKAResults(scenario,logsout)
+% plotLKAPerformance(logsout)
 
 % link to directory of LKA
 % C:\Users\Stage\Documents\MATLAB\Examples\R2020b\autonomous_control\LaneKeepingAssistWithLaneDetectionExample
