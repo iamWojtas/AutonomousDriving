@@ -1,0 +1,51 @@
+function [scenario,roadCenters,laneSpecification] = createDynamicTurnScenario(plotScenario) 
+% Create scenario and road specifications
+global v r
+
+if nargin < 1
+    plotScenario = false;
+end
+
+
+scenario = drivingScenario;
+scenario.StopTime = 80;
+% scenario.StopCondition = 'time';
+
+
+r = v^2/0.4/9.81;
+
+roadCenters = [
+    
+    4*r   0   0;
+    6.5*r 0   0;
+    7*r   0   0;
+    8*r   r   0;
+    7*r   2*r 0;
+    4*r   r   0;
+    r     2*r 0;
+    0     r   0;
+    r     0   0;
+    4*r   0   0
+];
+
+
+
+% Create lanes
+laneSpecification = lanespec(3);
+road(scenario, roadCenters, 'Lanes', laneSpecification);
+waypoints = roadCenters;
+% Add ego car
+egoCar = vehicle(scenario, ...
+    'ClassID', 1);
+trajectory(egoCar, waypoints, v);
+
+if plotScenario
+    plot(scenario,'Waypoints','on');
+    set(gcf,'color','w');
+end
+
+% drivingScenarioDesigner(scenario)
+
+% cuvatures = LineCurvature2D(roadCenters(:,1:2));
+% asdfa = 1./cuvatures;
+% asdfa(asdfa < 10000)

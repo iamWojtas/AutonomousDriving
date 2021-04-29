@@ -1,0 +1,27 @@
+function [u] = MPC_Controls(in)
+
+    global UU F Phi2 n_p Ts philip curva139
+    philip = in;
+    if any(isnan(in), 'all')
+        philip = 2137
+        sim('LKATestBenchExample')
+    end
+    get_param('YourModel','SimulationTime')
+    curvature = in(1:n_p);
+%     curvature = 
+    velocity = in(30+2);
+    X_k = in(30+3:30+7); % X_k = [x_k u_k]
+    
+    
+    psiPrim = curvature.*velocity;
+    
+    du = UU * (F * X_k + Phi2 * psiPrim);
+
+    
+    u = double(du(1,1));
+    if length(u(1,1)) ~=1
+        u = 2137;
+    end
+        
+end
+

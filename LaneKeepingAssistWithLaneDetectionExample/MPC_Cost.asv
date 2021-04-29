@@ -1,0 +1,91 @@
+function cost = MPC_Cost(t_in)
+
+global UU n_p w_u w_x n_c Phi1 v r sqrp
+
+tht1 = t_in.theta1;
+tht2 = t_in.theta2;
+tht3 = t_in.theta3;
+tht4 = t_in.theta4;
+% theta5 = t_in.theta5;
+% theta6 = t_in.theta6;
+
+kappa = 50;
+
+% tht1 = 400;
+tht3 = 9798;
+
+% w_x_theta = [1000*tht1 10*tht2 7000*tht3 300*tht4 5]; % p=30, c=10
+w_x_theta = [tht1 tht2 tht3 tht4 1]; % p=30, c=10
+w_x1_theta = repmat(w_x_theta,1,n_p);
+W_x_theta = diag(w_x1_theta);
+
+w_u = 1;
+W_u = ones(n_c,1)';
+
+u123 = UU;
+
+UU = -inv(Phi1' * W_x_theta * Phi1 + W_u) * Phi1' * W_x_theta;
+
+sum(sum(abs(u123 - UU)));
+
+% simStopTime = 36*13.9/v-3;
+% set_param('LKATestBenchExample','FastRestart','on')
+sim('LKATestBenchExample')
+
+if strcmp(get_param('LKATestBenchExample','FastRestart'),'on')
+    logsout = ans.logsout;
+    tout = ans.tout;
+end
+
+lateral_deviation = logsout.getElement('lateral_deviation');    % lateral deviation
+relative_yaw_angle = logsout.getElement('relative_yaw_angle');  % relative yaw angle
+head_derivative = logsout.getElement('head_derivative');        % yaw angle's derivative
+lateral_derivative = logsout.getElement('lateral_derivative');  % lateral deviation's derivative
+steering_angle = logsout.getElement('steering_angle');          % steering angle
+steer_derivative = logsout.getElement('steer_derivative');      % steering angle's derivative
+lateral_acceleration = logsout.getElement('lateral_acceleration');      % lateral_acceleration
+head_acceleration = logsout.getElement('head_acceleration');      % head_acceleration
+
+x1 = lateral_deviation.Values.Data;
+x2 = lateral_derivative.Values.Data;
+x3 = relative_yaw_angle.Values.Data;
+x4 = head_derivative.Values.Data;
+x5 = steering_angle.Values.Data;
+du = steer_derivative.Values.Data;
+
+acc = lateral_acceleration.Values.Data;
+hacc = head_acceleration.Values.Data;
+% state = [x1,x2,x3,x4,x5];
+
+plotLKAPerformance(logsout)
+
+% cost = sum(state.^2 * w_x');
+% cost = trace(state * diag(w_x) * state');
+% cost = cost + sum(du.^2 .* w_u);
+
+% 
+if max(x1) == 0.5 || min(x1) == -0.5
+    k = find(abs(x1)==0.5,1);
+    tout(k)*numel(tout)/length(x1)
+    cost = kappa + kappa/(tout(k)*numel(tout)/length(x1)+0.000001);
+% else
+end
+    cost = cost + x1'*x1; % lateral deviation
+    cost = cost + acc(5:numel(acc))'*acc(5:numel(acc))/3000; % lateral acceleration
+    cost = cost + x4'*x4; % heading angle
+% end
+
+% 
+% fh = findobj( 'Type', 'Figure', 'Name', 'Figure 1' );
+% frame = getframe(fh); 
+% im = frame2im(frame); 
+% [imind,cm] = rgb2ind(im,256); 
+% 
+% if sqrp == 1 
+% 	imwrite(imind,cm,'BayesFitting','gif', 'Loopcount',inf); 
+% else 
+% 	imwrite(imind,cm,'BayesFitting','gif','WriteMode','append'); 
+% end 
+% 
+% sqrp = sqrp + 1
+end
