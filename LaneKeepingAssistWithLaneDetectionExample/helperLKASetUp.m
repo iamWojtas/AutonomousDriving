@@ -38,12 +38,12 @@ s = get_param(blk{1},'PortHandles');
 get(s.Outport(1),'SignalHierarchy');
 
 %% Create scenario and road specifications
-[scenario,roadCenters,laneSpecification] = createDoubleCurveScenario;
-
+% [scenario,roadCenters,laneSpecification] = createDoubleCurveScenario;
+[scenario1,roadCenters,laneSpecification] = createDynamicTurnScenario;
 % You can use Driving Scenario Designer to explore the scenario
 % drivingScenarioDesigner(scenario)
 % drivingScenarioDesigner('LKATestBenchScenario')
 
 %% Generate data for Simulink simulation  
 [driverPath,x0_ego,y0_ego,v0_ego,yaw0_ego,simStopTime] = ...
-    createDriverPath(scenario,6);
+    createDriverPath(scenario1,6);
