@@ -1,13 +1,13 @@
 %% Open assistant
 % open_system('LKATestBenchExample')
 
-global UU F Phi2 n_p v Ts n_c Phi1 w_x w_u philip np r
+global UU F Phi2 n_p v Ts n_c Phi1 w_x w_u philip np nc r
 
 %% Open simple lka
 % mdl = 'mpcLKAsystem';
-time = 0:0.1:35;
+% time = 0:0.1:35;
 % open_system(mdl)
-
+% tic
 Ts = 0.1;
 
 Vx = v;
@@ -117,12 +117,15 @@ n_p = 30;
 np = n_p;
 % control horizon
 n_c = 10;
+nc = n_c
 
 % F matrix 
 F = AA;
 for i = 2:n_p
     F = [F; AA^i];
 end
+
+
 
 % Phi1 matrix
 Phi1 = BB1;
@@ -150,7 +153,7 @@ end
 
 % w_x = [0.2 0.5 1 100 1]; % p=10, c~=4
 % w_x = [3000 5000 3000 100000 5]; % p=30, c=5
-w_x = [1000 500 15798 15029 1]; % bayesopt
+% w_x = [1000 500 15798 15029 1]; % bayesopt
 % w_x = [1000 1000 7000 30000 5]; % p=30, c=10 HAND tuned
 
 % w_x = [2 5 10 400 0]; % Ts = 0.2 p=30, c=10
@@ -166,8 +169,8 @@ w_x = [1000 500 15798 15029 1]; % bayesopt
 % %     w_x = w_x.*1.1;   
 % end
 % w_x = repmap(w_x)
-w_x1 = repmat(w_x,1,n_p);
-W_x = diag(w_x1);
+% w_x1 = repmat(w_x,1,n_p);
+% W_x = diag(w_x1);
 
 % w_u = zeros(n_c,1);
 % w_u = 1;
@@ -182,13 +185,13 @@ W_x = diag(w_x1);
 
 
 % W_u = diag([1:n_c].*1000);%diag(w_u);
-W_u = eye(n_c);
+% W_u = eye(n_c);
 
-UU = -inv(Phi1' * W_x * Phi1 + W_u) * Phi1' * W_x;
+% UU = -inv(Phi1' * W_x * Phi1 + W_u) * Phi1' * W_x;
 
 % MPC_Control([1:n_p+7]')
 
-
+% disp(toc)
 % sim('Simulation')
 % PlotSim
 % sim('LKATestBenchExample')
@@ -202,3 +205,4 @@ UU = -inv(Phi1' * W_x * Phi1 + W_u) * Phi1' * W_x;
 
 % link to directory of LKA
 % C:\Users\Stage\Documents\MATLAB\Examples\R2020b\autonomous_control\LaneKeepingAssistWithLaneDetectionExample
+

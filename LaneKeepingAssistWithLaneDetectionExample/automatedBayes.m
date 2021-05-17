@@ -1,6 +1,6 @@
 global v egoCar hAxes scenario1 r
 
-begin = 8;
+begin = 30;
 step = 1;
 finish = 36;
 open_system('LKATestBenchExample');
@@ -14,4 +14,4 @@ for i = begin:step:finish
     mdlWks.DataSource = 'MATLAB Code';
     reload(mdlWks);
     BayesOpt;
-end    
+end      

@@ -1,8 +1,8 @@
 clc
 
-global v egoCar hAxes scenario1 r
+global v egoCar hAxes scenario1 r 
 
-v = 26;
+% v = 8;
 Model_Init;
 % Creating a track for a given speed
 % save_system('LKATestBenchExample');
@@ -37,12 +37,13 @@ results = bayesopt(fun,x,'MaxObjectiveEvaluations',50);
 % computeGain(results.XAtMinObjective.Variables);
 
 %Compute controller gains based on the minimum estimated point
-computeGain(results.XAtMinObjective.Variables);
+computeGain([0 results.XAtMinObjective.Variables]);
 
 
 % Saving to CSV file
 asdf = results.XAtMinObjective.Variables;
-dlmwrite('Interpolation.csv',[v asdf],'-append');
+objective = results.MinObjective;
+dlmwrite('Interpolation.csv',[objective v asdf],'-append');
 
 %Simulate the best fit
 % simStopTime = 2*simStopTime;

@@ -14,30 +14,39 @@ function plotLKAPerformance(logsout)
 lateral_deviation = logsout.getElement('lateral_deviation');    % lateral deviation
 relative_yaw_angle = logsout.getElement('relative_yaw_angle');  % relative yaw angle
 steering_angle = logsout.getElement('steering_angle');          % steering angle
+log_velocity = logsout.getElement('log_velocity');          % forward velocity
 
 %% Plot the results
 figure('Name','Controller Performance','position',[100 100 720 600]);
 % lateral deviation
-subplot(3,1,1);
+subplot(4,1,1);
 plot(lateral_deviation.Values.time,lateral_deviation.Values.Data,'b','LineWidth',2);grid on;
 legend('lateral deviation','location','NorthEast');
 title('Lateral deviation')
 xlabel('time (sec)')
 ylabel('lateral deviation (m)')
 % relative yaw angle
-subplot(3,1,2);
+subplot(4,1,2);
 plot(relative_yaw_angle.Values.time,relative_yaw_angle.Values.Data,'b','LineWidth',2);grid on;
 legend('relative yaw angle','location','NorthEast');
 title('Relative yaw angle')
 xlabel('time (sec)')
 ylabel('relative yaw angle (rad)')
 % steering angle
-subplot(3,1,3);
+subplot(4,1,3);
 plot(steering_angle.Values.time,steering_angle.Values.Data,'b','LineWidth',2);grid on;
 legend('steering angle','location','SouthEast');
 title('Steering angle')
 xlabel('time (sec)')
 ylabel('steering angle (rad)')
+
+% forward velocity
+subplot(4,1,4);
+plot(log_velocity.Values.time,log_velocity.Values.Data,'b','LineWidth',2);grid on;
+legend('forward velocity','location','SouthEast');
+title('forward velocity')
+xlabel('time (sec)')
+ylabel('forward velocity (m/s)')
 
 
 
