@@ -1,38 +1,19 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Reference longitudinal velocity generator and lateral MPC controller 
+% author: Wojciech Stróżecki 2021 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function [u] = MPC_Controls(in)
 
-%     global UU F Phi2 n_p Ts philip curva
-%     philip = in;
-%     if any(isnan(in), 'all')
-%         philip = 2137
-%         sim('LKATestBenchExample')
-%     end
-%     curTime = get_param('LKATestBenchExample','SimulationTime') *10;
-% %     curvature = in(1:n_p);
-%     curTime = cast(curTime ,'uint16');
-% 
-%     curvature = curva(1 + curTime : curTime + n_p);
-%     velocity = in(30+2);
-%     X_k = in(30+3:30+7); % X_k = [x_k u_k]
-%     
-%     
-%     psiPrim = curvature.*velocity;
-%     
-%     du = UU * (F * X_k + Phi2 * psiPrim);
-% 
-%     
-%     u = double(du(1,1));
-%     if length(u(1,1)) ~=1
-%         u = 2137;
-%     end
-
-    global UU F Phi2 np  Ts philip  gains Phi1 v        
+    global F Phi2 np nc gains Phi1     
+    
     % reference goal speed based on the curvature
     curvature = in(1:np);
     
     % Curvature dependance
     kappa = max(abs(curvature));
-    if kappa <= 0.0047
-        vref = 29;
+    if kappa <= 0.0032
+        vref = 35;
     else
         vref = sqrt(0.4*9.81/kappa);
     end
@@ -40,39 +21,38 @@ function [u] = MPC_Controls(in)
     % actual speed
     velocity = in(30+2);
     
-    if velocity >= 8
+    if velocity >= 9
         vint = int8(velocity)
     else
-        vint = int8(8)
+        vint = int8(9)
     end
     
-%     gains(vint-7,:)
-    modelInit(double(vint));
-    computeGain(gains(vint-7,:));
-    
-    
-    % state
+    % state extrac
     X_k = in(30+3:30+7); % X_k = [x_k u_k]
-    
     psiPrim = curvature.*velocity;
-    
-    du = UU * (F * X_k + Phi2 * psiPrim);
 
-
+    % adjusting the vehicle dynamical model to the current speed: F Phi1 Phi2
+    modelInit(double(vint));
+    gain = gains(vint-7,:);
     
-    u = double(du(1,1));
+    % constrained control:
+    fu = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gain,X_k,psiPrim);
     
+%     % unconstrained control: UU computation and so forth
+%     computeGain(gains(vint-7,:));
+%     Du = UU * (F * X_k + Phi2 * psiPrim);
+%     du = double(Du(1,1));
+%     fu = du + X_k(end); 
+    
+    % model singularity avoidance
     if velocity <= 1
-        u = 0;    
-    elseif length(u(1,1)) ~=1
-        u = 2137;
+        fu = 0;    
+    elseif length(fu(1,1)) ~=1
+        fu = 2137;
     end
-    u = [u; vref];
-%     philip = in;
-%     if any(isnan(in), 'all')
-%         philip = 2137
-%         sim('LKATestBenchExample')
-%     end
+    
+    u = [fu; vref];
+
 
 end
 

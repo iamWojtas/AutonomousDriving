@@ -1,6 +1,6 @@
 function cost = MPC_Cost(t_in)
 
-global UU n_p w_u w_x n_c Phi1 v r sqrp Ts
+global UU n_p w_u w_x n_c Phi1  v r sqrp Ts gains
 
 tht1 = t_in.theta1;
 tht2 = t_in.theta2;
@@ -23,7 +23,9 @@ W_x_theta = diag(w_x1_theta);
 w_u = tht6;
 W_u = w_u*ones(n_c,1)';
 
-UU = -inv(Phi1' * W_x_theta * Phi1 + W_u) * Phi1' * W_x_theta;
+% UU = -inv(Phi1' * W_x_theta * Phi1 + W_u) * Phi1' * W_x_theta;
+% UU = gains(int8(v)-7,:);
+UU = [ 1 tht1 tht2 tht3 tht4 tht5 tht6];
 
 sim('LKATestBenchExample')
 
@@ -37,7 +39,7 @@ relative_yaw_angle = logsout.getElement('relative_yaw_angle');  % relative yaw a
 head_derivative = logsout.getElement('head_derivative');        % yaw angle's derivative
 lateral_derivative = logsout.getElement('lateral_derivative');  % lateral deviation's derivative
 steering_angle = logsout.getElement('steering_angle');          % steering angle
-steer_derivative = logsout.getElement('steer_derivative');      % steering angle's derivative
+% steer_derivative = logsout.getElement('steer_derivative');      % steering angle's derivative
 lateral_acceleration = logsout.getElement('lateral_acceleration');      % lateral_acceleration
 head_acceleration = logsout.getElement('head_acceleration');      % head_acceleration
 
@@ -46,7 +48,7 @@ x2 = lateral_derivative.Values.Data;
 x3 = relative_yaw_angle.Values.Data;
 x4 = head_derivative.Values.Data;
 x5 = steering_angle.Values.Data;
-du = steer_derivative.Values.Data;
+% du = steer_derivative.Values.Data;
 
 acc = lateral_acceleration.Values.Data;
 acc = acc(acc<90&acc>-90);
@@ -63,10 +65,10 @@ hacc = hacc(hacc<8&hacc>-8);
 cost = 0;
 % 
 if max(x1) == 0.5 || min(x1) == -0.5
-    'wyszuem o';
+%     'wyszuem o';
     texit = find(x1 == max(x1),1) * Ts;
-    'kosztowauo mn to';
-    kappa1/(texit+0.000001);
+%     'kosztowauo mn to';
+%     kappa1/(texit+0.000001);
     cost = kappa2 + kappa1/(texit+0.000001);
     cost = cost + numel(x1(abs(x1) == 0.5))/3; %punishin each sample on 0.5 
 % else
@@ -77,8 +79,8 @@ end
     cost = cost + hacc'*hacc/100; % heading acceleration
     cost = cost + x4'*x4; % heading angle
 % end
-'max steering acc';
-max(du);
+% 'max steering acc';
+% max(du);
 
 % 
 % fh = findobj( 'Type', 'Figure', 'Name', 'Figure 1' );

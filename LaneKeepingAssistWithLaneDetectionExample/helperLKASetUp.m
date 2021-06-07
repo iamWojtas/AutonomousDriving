@@ -47,15 +47,22 @@ get(s.Outport(1),'SignalHierarchy');
 %% Generate data for Simulink simulation  
 [driverPath,x0_ego,y0_ego,v0_ego,yaw0_ego,simStopTime] = ...
     createDriverPath(scenario1,6);
+% initial pose for variable speed trajectory
+% x0_ego = 0;
+% y0_ego = -160;
+% yaw0_ego = -90;
+
+
 
 %% Load Gains BayesOpt - variable speed testing
 % To perform this test, compile this code cell and rewrite the maximum
 % curvature and maximum speed into MPC_Controls and change the simulink
 % scheme so that Matlab Interpreted Function block is the control, and not
-% the MATLAB Function
+% the MATLAB Function. Additionally, change the configuration of speed
+% control - change the manual switches in Vehicle and Environment subsystem
 gains = readtable('gainsTable.csv');
 global gains v_max
 gains = table2array(gains);
 
-v_max = 29;
+v_max = 35;
 mar_curv = 0.4*9.81/(v_max^2)

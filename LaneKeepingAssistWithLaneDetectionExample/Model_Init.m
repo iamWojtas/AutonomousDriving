@@ -117,7 +117,7 @@ n_p = 30;
 np = n_p;
 % control horizon
 n_c = 10;
-nc = n_c
+nc = n_c;
 
 % F matrix 
 F = AA;

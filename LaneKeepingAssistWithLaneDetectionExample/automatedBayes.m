@@ -1,8 +1,8 @@
 global v egoCar hAxes scenario1 r
 
-begin = 30;
+begin = 9;
 step = 1;
-finish = 36;
+finish = 35;
 open_system('LKATestBenchExample');
 for i = begin:step:finish
     v = i;

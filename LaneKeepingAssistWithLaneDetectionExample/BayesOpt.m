@@ -2,12 +2,12 @@ clc
 
 global v egoCar hAxes scenario1 r 
 
-% v = 8;
+% v = 9;
 Model_Init;
 % Creating a track for a given speed
 % save_system('LKATestBenchExample');
 % close_system('LKATestBenchExample');
-[scenario1,roadCenters,laneSpecification,egoCar] = createDynamicTurnScenario;
+% [scenario1,roadCenters,laneSpecification,egoCar] = createDynamicTurnScenario;
 % open_system('LKATestBenchExample');
 
 x0_ego = 3*r;
@@ -16,8 +16,8 @@ simStopTime = 18*r/v;
 
 theta1 = optimizableVariable('theta1',[0,5000]);
 theta2 = optimizableVariable('theta2',[0,400]);
-theta3 = optimizableVariable('theta3',[0,50000]);
-theta4 = optimizableVariable('theta4',[0,30000]);
+theta3 = optimizableVariable('theta3',[0,60000]);
+theta4 = optimizableVariable('theta4',[0,35000]);
 theta5 = optimizableVariable('theta5',[1,1000]);
 theta6 = optimizableVariable('theta6',[1,1000]);
 
