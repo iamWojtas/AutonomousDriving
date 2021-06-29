@@ -16,8 +16,8 @@ function u = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gain,xk,psiPrim,vint)
     umax = 0.5;
     dumin = -0.1;
     dumax = 0.1;
-    ymin = -0.45;
-    ymax = 0.45;
+    ymin = -0.35;
+    ymax = 0.35;
 %% Hildreths
     if vint < 20
 
@@ -67,9 +67,10 @@ function u = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gain,xk,psiPrim,vint)
         numbConstr = 3*nc + 2*np;
         gammann = 10000;
         bigNumber = 100000;
-
-        xiM = ones(nc,1)*dumin;
-        xiP = ones(nc,1)*dumax;
+        singleConstraint = [1 bigNumber*ones(1,nc-1)]';
+        
+        xiM = ones(nc,1)*dumin;%.*singleConstraint;
+        xiP = ones(nc,1)*dumax;%.*singleConstraint;
         
         C1 = ones(nc,1);
         C2 = tril(ones(nc,nc));
