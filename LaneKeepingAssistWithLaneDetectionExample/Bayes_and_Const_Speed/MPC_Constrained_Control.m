@@ -16,10 +16,10 @@ function u = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gain,xk,psiPrim,vint)
     umax = 0.5;
     dumin = -0.1;
     dumax = 0.1;
-    ymin = -0.35;
-    ymax = 0.35;
+    ymin = -0.25;
+    ymax = 0.25;
 %% Hildreths
-    if vint < 20
+%     if vint < 20
 
         % QP variables
         C1 = ones(nc,1);
@@ -57,49 +57,48 @@ function u = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gain,xk,psiPrim,vint)
         du = Du(1,1);
 
         u = du + xk(end);
-    end
+%     end
     
     %% NN
-    if vint == 20
-        
-        tEnd = 1e-7;
-        
-        numbConstr = 3*nc + 2*np;
-        gammann = 10000;
-        bigNumber = 100000;
-        singleConstraint = [1 bigNumber*ones(1,nc-1)]';
-        
-        xiM = ones(nc,1)*dumin;%.*singleConstraint;
-        xiP = ones(nc,1)*dumax;%.*singleConstraint;
-        
-        C1 = ones(nc,1);
-        C2 = tril(ones(nc,nc));
-        Wnn = 2*(Phi1'*W_x*Phi1 + W_u);
-        qnn = 2*((F*xk)'*W_x*Phi1 + (Phi2*psiPrim)'*W_x*Phi1)';
-        Ann = [-C2;...
-            C2;...
-            -Phi1n;...
-            Phi1n...
-            ];
-        bnn = [-umin*ones(nc,1) + C1*xk(end);...
-            umax*ones(nc,1) - C1*xk(end);...
-            -ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim;...
-            ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim...
-            ];
-        Hnn = [Wnn  -Ann'; Ann zeros(length(Ann),length(Ann'))];
-        eyenn = eye(length(Hnn));
-        pnn = [qnn; -bnn]; 
-        zetaP = [xiP; bigNumber*ones(length(Ann),1)];   
-        zetaM = [xiM; bigNumber*zeros(length(Ann),1)];
-        siusiaczek = 42;
-%         options = simset('SrcWorkspace','current');
-%         sim('modelname',[],options)
-        
-        logsss = sim('LVI_PDNN_for_QP2', 'SrcWorkspace', 'current','timeout',10);
-        Du = logsss.logsout.getElement('du');
-        du = Du.Values.Data(1,:,end);
-        u = du + xk(end);
-    end
+%     if vint == 20
+%         
+%         tEnd = 1e-7;
+%         
+%         numbConstr = 3*nc + 2*np;
+%         gammann = 10000;
+%         bigNumber = 100000;
+%         singleConstraint = [1 bigNumber*ones(1,nc-1)]';
+%         
+%         xiM = ones(nc,1)*dumin;%.*singleConstraint;
+%         xiP = ones(nc,1)*dumax;%.*singleConstraint;
+%         
+%         C1 = ones(nc,1);
+%         C2 = tril(ones(nc,nc));
+%         Wnn = 2*(Phi1'*W_x*Phi1 + W_u);
+%         qnn = 2*((F*xk)'*W_x*Phi1 + (Phi2*psiPrim)'*W_x*Phi1)';
+%         Ann = [-C2;...
+%             C2;...
+%             -Phi1n;...
+%             Phi1n...
+%             ];
+%         bnn = [-umin*ones(nc,1) + C1*xk(end);...
+%             umax*ones(nc,1) - C1*xk(end);...
+%             -ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim;...
+%             ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim...
+%             ];
+%         Hnn = [Wnn  -Ann'; Ann zeros(length(Ann),length(Ann'))];
+%         eyenn = eye(length(Hnn));
+%         pnn = [qnn; -bnn]; 
+%         zetaP = [xiP; bigNumber*ones(length(Ann),1)];   
+%         zetaM = [xiM; bigNumber*zeros(length(Ann),1)];
+% %         options = simset('SrcWorkspace','current');
+% %         sim('modelname',[],options)
+%         
+%         logsss = sim('LVI_PDNN_for_QP2', 'SrcWorkspace', 'current','timeout',10);
+%         Du = logsss.logsout.getElement('du');
+%         du = Du.Values.Data(1,:,end);
+%         u = du + xk(end);
+%     end
 % % u = 0;	
 
 %% data collection for NN validation

@@ -45,8 +45,10 @@ singleConstraintNp = [1 bigNumber*ones(1,np-1)]';
 
 %% NN
 numbConstr = 3*nc + 2*np;
-gammann = 10000;
-tEnd = 1e-8;
+gammann = .01000;
+tEnd = 1e-2;
+sampleTime = tEnd/1000000;
+
 
 xiM = ones(nc,1)*dumin;%.*singleConstraintNc;
 xiP = ones(nc,1)*dumax;%.*singleConstraintNc;
