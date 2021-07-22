@@ -5,7 +5,7 @@
 
 function [u] = MPC_Controls(in)
 
-    global F Phi2 np nc gains Phi1     
+    global F Phi2 np nc gains Phi1 v    
     
     % reference goal speed based on the curvature
     curvature = in(1:np);
@@ -27,6 +27,9 @@ function [u] = MPC_Controls(in)
         vint = int8(9)
     end
     
+    % NN speed 
+%     vint = int8(v);
+    
     % state extrac
     X_k = in(30+3:30+7); % X_k = [x_k u_k]
     psiPrim = curvature.*velocity;
@@ -35,10 +38,15 @@ function [u] = MPC_Controls(in)
     modelInit(double(vint));
     gain = gains(vint-7,:);
     
+    if vint == 15
+        cokolwiek = 420;
+    end
     % constrained control:
-    fu = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gain,X_k,psiPrim);
+    fu = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gain,X_k,psiPrim,vint);
+
+
     
-%     % unconstrained control: UU computation and so forth
+%     % unconstrained control: UU computation 
 %     computeGain(gains(vint-7,:));
 %     Du = UU * (F * X_k + Phi2 * psiPrim);
 %     du = double(Du(1,1));

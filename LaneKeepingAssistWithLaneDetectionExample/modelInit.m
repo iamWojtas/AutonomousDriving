@@ -12,6 +12,17 @@ function out = modelInit(vdouble)
     m = 1575;
     Iz = 2875; 
 
+    % approx 10% error of parameters
+%     lr = 1.1;
+%     lf = 1.7;
+%     ls = 0;
+% 
+%     Cf = 17000; 
+%     Cr = 36000; 
+% 
+%     m = 1775;
+%     Iz = 2675; 
+
     cr = Cr;
     cf = Cf;
     iz = Iz;

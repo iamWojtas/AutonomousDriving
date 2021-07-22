@@ -23,7 +23,7 @@
 %     end
 % end
 
-function eta = BookHildreth(H,f,A_cons,b)
+function eta = BookHildreth(H,f,A_cons,b,vint)
 
 %     E=H;
 %     F=f;
@@ -53,6 +53,8 @@ function eta = BookHildreth(H,f,A_cons,b)
     x_ini=zeros(n,m);
     lambda=x_ini;
     al=10;
+    iterator = 0;
+    etaPlot = zeros(10,10000);
 
     for km=1:10000
     
@@ -60,7 +62,14 @@ function eta = BookHildreth(H,f,A_cons,b)
         % km could be larger if the Lagranger multiplier has a slow
         % convergence rate.
         lambda_p=lambda;
-
+        
+        
+%         % plotting the convergence pt 1/2
+%         if vint == 20
+%             etaPlot(:,km)=-H\f -H\A_cons'*lambda;
+%             iterator = iterator + 1;
+%         end
+        
         for i=1:n
             w= P(i,:)*lambda-P(i,i)*lambda(i,1);
             w=w+d(i,1);
@@ -69,9 +78,16 @@ function eta = BookHildreth(H,f,A_cons,b)
         end
         
         al=(lambda-lambda_p)'*(lambda-lambda_p);
+%         % plotting the convergence pt 1/2
+%             if vint == 20 && iterator > 100 && iterator < 200
+%                 etaPlot = etaPlot(:,1:iterator);
+%                 plot(etaPlot')
+%                 cokolwiek = 123 ;
+%             end% 
         if (al<10e-8)
             break;
         end
+        
     end
-    eta=-H\f -H\A_cons'*lambda;
+    eta=-H\f -H\A_cons'*lambda; 
 end

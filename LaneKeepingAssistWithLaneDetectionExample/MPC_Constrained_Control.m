@@ -1,9 +1,9 @@
-function u = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gains,xk,psiPrim)
+function u = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gain,xk,psiPrim,vint)
 
-    w_x = gains(2:6);
+    w_x = gain(2:6);
     w_x1 = repmat(w_x,1,np);
     W_x = diag(w_x1);
-    w_u = gains(7)*ones(nc,1)';
+    w_u = gain(7)*ones(nc,1)';
     W_u = diag(w_u);
 
     % constraints on x1 only require transformation og F, Phi1 and Phi2 m-x
@@ -11,18 +11,14 @@ function u = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gains,xk,psiPrim)
     Phi2n = Phi2(1:length(w_x):end,:);
     Fn = F(1:length(w_x):end,:);
 
-
-    
-    
-    
     % constraints values
     umin = -0.5;
     umax = 0.5;
     dumin = -0.1;
     dumax = 0.1;
-    ymin = -0.35;
-    ymax = 0.35;
-
+    ymin = -0.45;
+    ymax = 0.45;
+%% Hildreths
     % QP variables
     C1 = ones(nc,1);
     C2 = tril(ones(nc,nc));
@@ -43,39 +39,65 @@ function u = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gains,xk,psiPrim)
         -ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim;...
         ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim...
         ];
+    bigNumber = 1000000;
+    singleConstraintNc = [1 bigNumber*ones(1,nc-1)]';
+    singleConstraintNp = [1 bigNumber*ones(1,np-1)]';
+    gammaSingleConstraint = [-dumin*ones(nc,1).*singleConstraintNc;...
+        dumax*ones(nc,1).*singleConstraintNc;...
+        (-umin*ones(nc,1) + C1*xk(end)).*singleConstraintNc;...
+        (umax*ones(nc,1) - C1*xk(end)).*singleConstraintNc;...
+        -ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim;...
+        ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim...
+        ];
+%     gammaSingleConstraintAll = [-dumin*ones(nc,1).*singleConstraintNc;...
+%     dumax*ones(nc,1).*singleConstraintNc;...
+%     (-umin*ones(nc,1) + C1*xk(end)).*singleConstraintNc;...
+%     (umax*ones(nc,1) - C1*xk(end)).*singleConstraintNc;...
+%     (-ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim).*singleConstraintNp;...
+%     (ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim).*singleConstraintNp...
+%     ];
     
-    % Iterative constraint violation check
-%     lambda = -inv(Mo*invEo*Mo')*(gamma + Mo*invEo*Fo');
-%     find(lambda >= 0)
 
-
-
-
-
-% Solving QP with Active set - will break for more than nc active constraints:
-% %     if all(lambda < 0)
-%     if det(Mo*(Eo\Mo')) <= 0
-%         Du = -invEo*Fo';
-%         du = Du(1,1);
-%         u = du + xk(end);
-%     else
-%         lambda = -inv(Mo*invEo*Mo')*(gamma + Mo*invEo*Fo');
-%         while ~all(lambda >= 0)
-%             act = find(lambda >= 0);
-%             gammaact = gamma(act,:);
-%             Moact = Mo(act,:);
-%             lambda = -inv(Moact*invEo*Moact')*(gammaact + Moact*invEo*Fo');
-%         end
-%         Du = -invEo*(Fo + Moact*lambda);
-%         du = Du(1,1);
-%         u = du + xk(end); 
-%     end
-
-% Solving QP with Hildreth
-    Du = BookHildreth(Eo,Fo,Mo,gamma);
+%% Solving QP with Hildreth
+    Du = BookHildreth(Eo,Fo,Mo,gamma,vint);
     du = Du(1,1);
     u = du + xk(end);
-% Important program features
+    %% NN
+%     numbConstr = 3*nc + 2*np;
+%     gammann = 10000;
+%     bigNumber = 10000;
+%     xiM = ones(nc,1)*dumin;
+%     xiP = ones(nc,1)*dumax;
+% 
+%     C1 = ones(nc,1);
+%     C2 = tril(ones(nc,nc));
+%     Wnn = 2*(Phi1'*W_x*Phi1 + W_u);
+%     qnn = 2*((F*xk)'*W_x*Phi1 + (Phi2*psiPrim)'*W_x*Phi1)';
+%     Ann = [-C2;...
+%         C2;...
+%         -Phi1n;...
+%         Phi1n...
+%         ];
+%     bnn = [-umin*ones(nc,1) + C1*xk(end);...
+%         umax*ones(nc,1) - C1*xk(end);...
+%         -ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim;...
+%         ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim...
+%         ];
+%     Hnn = [Wnn  -Ann'; Ann zeros(length(Ann),length(Ann'))];
+%     pnn = [qnn; -bnn]; 
+%     zetaP = [xiP; bigNumber*ones(length(Ann),1)];   
+%     zetaM = [xiM; bigNumber*zeros(length(Ann),1)];
+%     
+%     logsss = sim('LVI_PDNN_for_QP','timeout',33);
+%     Du = logsss.logsout.getElement('du');
+%     du = Du.Values.Data(end);
+%     u = du + xk(end);
+%     
+%% data collection for NN validation
+    if vint == 15
+        cokolwwiek = 2137;
+    end
+%% Important program features
     fi_ut = 14.5;
 end
 

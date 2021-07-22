@@ -71,7 +71,7 @@
 
 
 
-function plotLKAPerformance_Combined(logsout1,logsout2,logsout3,texts)
+function plotLKAPerformance_Combined(texts,logsout1,logsout2,logsout3)
 % A helper function for plotting the results of the LKA demo.
 %
 %   This is a helper function for example purposes and may be removed or
@@ -94,10 +94,11 @@ lateral_deviation2 = logsout2.getElement('lateral_deviation');    % lateral devi
 relative_yaw_angle2 = logsout2.getElement('relative_yaw_angle');  % relative yaw angle
 steering_angle2 = logsout2.getElement('steering_angle');          % steering angle
 
-lateral_deviation3 = logsout3.getElement('lateral_deviation');    % lateral deviation
-relative_yaw_angle3 = logsout3.getElement('relative_yaw_angle');  % relative yaw angle
-steering_angle3 = logsout3.getElement('steering_angle');          % steering angle
-
+if nargin > 3
+    lateral_deviation3 = logsout3.getElement('lateral_deviation');    % lateral deviation
+    relative_yaw_angle3 = logsout3.getElement('relative_yaw_angle');  % relative yaw angle
+    steering_angle3 = logsout3.getElement('steering_angle');          % steering angle
+end
 %% Plot the results
 figure('Name','Controller Performance','position',[100 100 720 600],'Color','white');
 % lateral deviation
@@ -105,7 +106,9 @@ subplot(3,1,1);
 plot(lateral_deviation1.Values.time,lateral_deviation1.Values.Data,'r','LineWidth',2);
 hold on
 plot(lateral_deviation2.Values.time,lateral_deviation2.Values.Data,'g','LineWidth',2);
-plot(lateral_deviation3.Values.time,lateral_deviation3.Values.Data,'b','LineWidth',2);
+if nargin > 3
+    plot(lateral_deviation3.Values.time,lateral_deviation3.Values.Data,'b','LineWidth',2);
+end
 grid on;
 legend(texts,'location','NorthEast');
 title('Lateral deviation')
@@ -116,7 +119,9 @@ subplot(3,1,2);
 plot(relative_yaw_angle1.Values.time,relative_yaw_angle1.Values.Data,'r','LineWidth',2);
 hold on
 plot(relative_yaw_angle2.Values.time,relative_yaw_angle2.Values.Data,'g','LineWidth',2);
-plot(relative_yaw_angle3.Values.time,relative_yaw_angle3.Values.Data,'b','LineWidth',2);
+if nargin > 3
+    plot(relative_yaw_angle3.Values.time,relative_yaw_angle3.Values.Data,'b','LineWidth',2);
+end
 grid on;
 legend(texts,'location','NorthEast');
 title('Relative yaw angle')
@@ -127,7 +132,10 @@ subplot(3,1,3);
 plot(steering_angle1.Values.time,steering_angle1.Values.Data,'r','LineWidth',2);
 hold on
 plot(steering_angle2.Values.time,steering_angle2.Values.Data,'g','LineWidth',2);
-plot(steering_angle3.Values.time,steering_angle3.Values.Data,'b','LineWidth',2);
+
+if nargin > 3
+    plot(steering_angle3.Values.time,steering_angle3.Values.Data,'b','LineWidth',2);
+end
 grid on;
 legend(texts,'location','NorthEast');
 title('Steering angle')
