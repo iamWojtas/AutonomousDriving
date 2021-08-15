@@ -37,6 +37,7 @@ function [u] = MPC_Controls(in)
     % adjusting the vehicle dynamical model to the current speed: F Phi1 Phi2
     modelInit(double(vint));
     gain = gains(vint-7,:);
+    gain = gains(20-7,:);
     
     if vint == 15
         cokolwiek = 420;
