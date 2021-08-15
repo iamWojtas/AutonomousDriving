@@ -62,4 +62,4 @@ global gains v_max
 gains = table2array(gains);
 
 v_max = 35;
-mar_curv = 0.4*9.81/(v_max^2)
+mar_curv = 0.4*9.81/(v_max^2);

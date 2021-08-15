@@ -1,5 +1,5 @@
 %% constant input data:
-v = 20;
+v = 14;
 vint = v;
 modelInit(v);
 global Phi1 Phi2 F nc np gains v
@@ -50,8 +50,8 @@ tEnd = 1e-2;
 sampleTime = tEnd/1000000;
 
 
-xiM = ones(nc,1)*dumin;%.*singleConstraintNc;
-xiP = ones(nc,1)*dumax;%.*singleConstraintNc;
+xiM = ones(nc,1)*dumin.*singleConstraintNc;
+xiP = ones(nc,1)*dumax.*singleConstraintNc;
 
 % QP variables
 Wnn = 2*(Phi1'*W_x*Phi1 + W_u);
@@ -77,38 +77,38 @@ zetaM = [xiM; bigNumber*zeros(length(Ann),1)];
 
 %% Hildreth
 
-Eo = 2*(Phi1'*W_x*Phi1 + W_u);
-invEo = inv(Eo);
-Fo = 2*((F*xk)'*W_x*Phi1 + (Phi2*psiPrim)'*W_x*Phi1)';
-
-
-% All constraints imposed (only the first state in all cases): 
-Mo = [-eye(nc);...
-    eye(nc);...
-    -C2;...
-    C2;...
-    -Phi1n;...
-    Phi1n...
-    ];
-gamma = [-dumin*ones(nc,1);...
-    dumax*ones(nc,1);...
-    -umin*ones(nc,1) + C1*xk(end);...
-    umax*ones(nc,1) - C1*xk(end);...
-    -ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim;...
-    ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim...
-    ];
-Du = BookHildreth(Eo,Fo,Mo,gamma,vint);
-
-% Single constraint on control and its rate: 
-
-gammaSingleConstraint = [-dumin*ones(nc,1).*singleConstraintNc;...
-    dumax*ones(nc,1).*singleConstraintNc;...
-    (-umin*ones(nc,1) + C1*xk(end)).*singleConstraintNc;...
-    (umax*ones(nc,1) - C1*xk(end)).*singleConstraintNc;...
-    -ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim;...
-    ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim...
-    ];
-Du = BookHildreth(Eo,Fo,Mo,gammaSingleConstraint,vint);
+% Eo = 2*(Phi1'*W_x*Phi1 + W_u);
+% invEo = inv(Eo);
+% Fo = 2*((F*xk)'*W_x*Phi1 + (Phi2*psiPrim)'*W_x*Phi1)';
+% 
+% 
+% % All constraints imposed (only the first state in all cases): 
+% Mo = [-eye(nc);...
+%     eye(nc);...
+%     -C2;...
+%     C2;...
+%     -Phi1n;...
+%     Phi1n...
+%     ];
+% gamma = [-dumin*ones(nc,1);...
+%     dumax*ones(nc,1);...
+%     -umin*ones(nc,1) + C1*xk(end);...
+%     umax*ones(nc,1) - C1*xk(end);...
+%     -ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim;...
+%     ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim...
+%     ];
+% % Du = BookHildreth(Eo,Fo,Mo,gamma,vint);
+% 
+% % Single constraint on control and its rate: 
+% 
+% gammaSingleConstraint = [-dumin*ones(nc,1).*singleConstraintNc;...
+%     dumax*ones(nc,1).*singleConstraintNc;...
+%     (-umin*ones(nc,1) + C1*xk(end)).*singleConstraintNc;...
+%     (umax*ones(nc,1) - C1*xk(end)).*singleConstraintNc;...
+%     -ymin*ones(np,1) + Fn*xk + Phi2n*psiPrim;...
+%     ymax*ones(np,1) - Fn*xk - Phi2n*psiPrim...
+%     ];
+% Du = BookHildreth(Eo,Fo,Mo,gammaSingleConstraint,vint);
 
 
 % Single constraint on x1, control and rate: 
@@ -123,5 +123,45 @@ Du = BookHildreth(Eo,Fo,Mo,gammaSingleConstraint,vint);
 % Du = BookHildreth(Eo,Fo,Mo,gammaSingleConstraintAll,vint);
 
 
+%% Solving the ODE maybee
+% P(d,dp,dm)
+clc
+tspan = linspace(0,10);%tEnd/10);
+d0 = 0.1*(rand(numbConstr,1)-0.5);
+tic
 
+odefun = @(t,y)first_order(t,d,Hnn,eyenn,zetaP,zetaM,pnn,gammann);
+efun = @(t,y)odeevent(t,d,Hnn,eyenn,zetaP,zetaM,pnn,gammann);
+options = odeset('Events',efun);
+
+z = ode15s(odefun,tspan,d0,options);
+% z = ode15s(@(t,d)first_order(t,d,Hnn,eyenn,zetaP,zetaM,pnn,gammann),t,d0,opts);
+
+toc
+time = z.x;
+d = z.y;
+% 
+plot(time,d(1:nc,:));
+
+%%%%%% steady state condidtioin
+function [x,isterm,dir] = odeevent(~,d,Hnn,eyenn,zetaP,zetaM,pnn,gammann)
+    dy = first_order([],d,Hnn,eyenn,zetaP,zetaM,pnn,gammann);
+    x = norm(dy) - 1e-5;
+    isterm = 1;
+    dir = 0;  %or -1, doesn't matter
+end
+%%%%%%
+
+function dDdt = first_order(~,d,Hnn,eyenn,zetaP,zetaM,pnn,gammann)
+    dDdt = zeros(length(Hnn),1);
+    dDdt(1:length(Hnn),1) = (gammann*(eyenn+Hnn') * (P(d-(Hnn*d+pnn),zetaP,zetaM) - d));
+
+end
+
+function out = P(d,dp,dm)
+
+    o1 =  min(d,dp);
+    out = max(o1,dm);
+    
+end
 

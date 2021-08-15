@@ -54,7 +54,7 @@ function eta = BookHildreth(H,f,A_cons,b,vint)
     lambda=x_ini;
     al=10;
 
-    for km=1:10000
+    for km=1:20000
     
         %find the elements in the solution vector one by one
         % km could be larger if the Lagranger multiplier has a slow

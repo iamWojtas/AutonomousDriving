@@ -34,16 +34,21 @@ function u = MPC_Controls_Bayes(in)
     % gain contains one set of 6 gains
 %     % the case for optimal set:
     gain = gains(vint-7,:);
-
+    
 %     the case for Bayesian Optimization (UU)
 %     gain = UU;
+    
+    tMain = tic;
+    
+    fu = MPC_NN(Phi1,Phi2,F,np,nc,gain,X_k,psiPrim,vint);
+%     fu = MPC_Hildreth(Phi1,Phi2,F,np,nc,gain,X_k,psiPrim,vint);
+    
+    cTime = toc(tMain);
 
     if velocity <= 1
         fu = 0;    
-    else 
-        fu = MPC_Constrained_Control(Phi1,Phi2,F,np,nc,gain,X_k,psiPrim,vint);
     end
     
-    u = [fu; velocity];          
+    u = [fu; velocity; cTime];          
 end
 

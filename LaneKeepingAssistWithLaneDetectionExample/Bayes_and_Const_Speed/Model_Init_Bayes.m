@@ -9,7 +9,7 @@ global UU F Phi2 n_p v Ts n_c Phi1 w_x w_u philip np nc r UU
 % open_system(mdl)
 % tic
 Ts = 0.1;
-v = 20;
+v = 14;
 UU = 2137; 
 Vx = v;
 v0_ego = Vx;
@@ -82,7 +82,7 @@ c_sys = ss(Ac,Bc,Cc,Dc);
 
 % 
 % rank(ctrb(Ac,B1c))
-% kp = [-5-3i -5+3i -7 -10];
+% kp = [-5-3i -5+3i -2 -10];
 % K = acker(Ac,B1c,kp)
 
 %% MPC
@@ -114,10 +114,10 @@ u_k_1 = 0;
 X_k = [x_k; u_k_1];
 
 % prediction horizon
-n_p = 15;
+n_p = 24;
 np = n_p;
 % control horizon
-n_c = 5;
+n_c = 8;
 nc = n_c;
 
 % F matrix 
@@ -147,6 +147,8 @@ for i = 1:n_p-1
     aa = [zeros(i*5 , 1) ; Phi2(1:(5*(n_p - i)) , 1)];
     Phi2 = [Phi2 aa];
 end
+
+
 
 %% weights
 
